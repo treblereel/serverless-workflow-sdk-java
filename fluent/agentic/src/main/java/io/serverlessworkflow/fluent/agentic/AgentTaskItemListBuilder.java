@@ -15,6 +15,8 @@
  */
 package io.serverlessworkflow.fluent.agentic;
 
+import dev.langchain4j.agentic.cognisphere.Cognisphere;
+import dev.langchain4j.agentic.cognisphere.CognisphereRegistry;
 import dev.langchain4j.agentic.internal.AgentExecutor;
 import io.serverlessworkflow.api.types.Task;
 import io.serverlessworkflow.api.types.TaskItem;
@@ -32,6 +34,9 @@ import java.util.function.Consumer;
 
 public class AgentTaskItemListBuilder extends BaseTaskItemListBuilder<AgentTaskItemListBuilder>
     implements AgentDoFluent<AgentTaskItemListBuilder> {
+
+  private final Cognisphere cognisphere =
+      CognisphereRegistry.getInstance().createEphemeralCognisphere();
 
   private final FuncTaskItemListBuilder delegate;
 
@@ -54,7 +59,9 @@ public class AgentTaskItemListBuilder extends BaseTaskItemListBuilder<AgentTaskI
   public AgentTaskItemListBuilder agent(String name, Object agent) {
     AgentAdapters.toExecutors(agent)
         .forEach(
-            exec -> this.delegate.callFn(name, fn -> fn.function(AgentAdapters.toFunction(exec))));
+            exec ->
+                this.delegate.callFn(
+                    name, fn -> fn.function(AgentAdapters.toFunction(cognisphere, exec))));
     return self();
   }
 
@@ -82,7 +89,7 @@ public class AgentTaskItemListBuilder extends BaseTaskItemListBuilder<AgentTaskI
           List<AgentExecutor> execs = AgentAdapters.toExecutors(agents);
           for (int i = 0; i < execs.size(); i++) {
             AgentExecutor ex = execs.get(i);
-            fork.branch("branch-" + i + "-" + name, AgentAdapters.toFunction(ex));
+            fork.branch("branch-" + i + "-" + name, AgentAdapters.toFunction(cognisphere, ex));
           }
         });
     return self();

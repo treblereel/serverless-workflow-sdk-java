@@ -16,6 +16,7 @@
 package io.serverlessworkflow.fluent.agentic;
 
 import dev.langchain4j.agentic.cognisphere.Cognisphere;
+import dev.langchain4j.agentic.cognisphere.CognisphereRegistry;
 import dev.langchain4j.agentic.internal.AgentExecutor;
 import io.serverlessworkflow.api.types.ForTaskConfiguration;
 import io.serverlessworkflow.api.types.func.ForTaskFunction;
@@ -30,6 +31,9 @@ public class LoopAgentsBuilder {
 
   private final FuncTaskItemListBuilder funcDelegate;
   private final ForTaskFunction forTask;
+
+  private final Cognisphere cognisphere =
+      CognisphereRegistry.getInstance().createEphemeralCognisphere();
 
   LoopAgentsBuilder() {
     this.forTask = new ForTaskFunction();
@@ -47,7 +51,8 @@ public class LoopAgentsBuilder {
         execs,
         (exec, idx) ->
             funcDelegate.callFn(
-                baseName + "-" + idx, fn -> fn.function(AgentAdapters.toFunction(exec))));
+                baseName + "-" + idx,
+                fn -> fn.function(AgentAdapters.toFunction(cognisphere, exec))));
     return this;
   }
 

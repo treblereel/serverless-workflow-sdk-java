@@ -22,6 +22,7 @@ import dev.langchain4j.agentic.internal.AgentExecutor;
 import dev.langchain4j.agentic.internal.AgentInstance;
 import io.serverlessworkflow.impl.expressions.LoopPredicateIndex;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -34,8 +35,19 @@ public final class AgentAdapters {
     return agentsToExecutors(Stream.of(agents).map(AgentInstance.class::cast).toArray());
   }
 
-  public static Function<Cognisphere, Object> toFunction(AgentExecutor exec) {
-    return exec::invoke;
+  public static Function<Object, Object> toFunction(Cognisphere cognisphere, AgentExecutor exec) {
+    return object -> {
+      if (object instanceof Map) {
+        Map<String, Object> input = (Map<String, Object>) object;
+        String outputName = exec.agentSpecification().outputName();
+        cognisphere.writeStates(input);
+
+        Object result = exec.invoke(cognisphere);
+        input.put(outputName, result);
+        return result;
+      }
+      return exec.invoke(cognisphere);
+    };
   }
 
   public static LoopPredicateIndex<Object, Object> toWhile(Predicate<Cognisphere> exit) {
