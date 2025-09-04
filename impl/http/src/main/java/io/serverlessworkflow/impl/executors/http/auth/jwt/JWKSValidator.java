@@ -15,29 +15,6 @@
  */
 package io.serverlessworkflow.impl.executors.http.auth.jwt;
 
-import java.time.Instant;
-import java.util.List;
-import java.util.Optional;
-
-public interface JWT {
-
-  String token();
-
-  List<String> audience();
-
-  String algorithm();
-
-  <T> Optional<T> claim(String name, Class<T> type);
-
-  Optional<Instant> expiresAt();
-
-  Optional<Instant> issuedAt();
-
-  Optional<String> issuer();
-
-  String keyId();
-
-  Optional<String> subject();
-
-  Optional<String> type();
+public interface JWKSValidator {
+    void validate(JWT jwt, String jwksUrl);
 }

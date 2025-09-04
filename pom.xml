@@ -96,6 +96,8 @@
         <!-- Base langchain4j version -->
         <version.dev.langchain4j>1.4.0</version.dev.langchain4j>
 
+        <version.com.auth0.jwt>4.5.0</version.com.auth0.jwt>
+
         <!-- Checkstyle props -->
         <checkstyle.failOnViolation>true</checkstyle.failOnViolation>
         <checkstyle.header.extensions>java</checkstyle.header.extensions>
@@ -204,6 +206,11 @@
                 <groupId>jakarta.validation</groupId>
                 <artifactId>jakarta.validation-api</artifactId>
                 <version>${version.jakarta.validation}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.auth0</groupId>
+                <artifactId>java-jwt</artifactId>
+                <version>${version.com.auth0.jwt}</version>
             </dependency>
 
             <!-- test -->

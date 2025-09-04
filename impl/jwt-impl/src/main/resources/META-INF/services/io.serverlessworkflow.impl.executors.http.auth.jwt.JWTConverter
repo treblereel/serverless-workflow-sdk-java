@@ -1,1 +1,1 @@
-io.serverlessworkflow.impl.executors.http.oauth.jackson.JacksonJWTConverter
+io.serverlessworkflow.impl.executors.http.oauth.auth0.Auth0JWTConverter

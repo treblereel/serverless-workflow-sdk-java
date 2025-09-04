@@ -22,15 +22,20 @@ import io.serverlessworkflow.impl.TaskContext;
 import io.serverlessworkflow.impl.WorkflowApplication;
 import io.serverlessworkflow.impl.WorkflowContext;
 import io.serverlessworkflow.impl.WorkflowModel;
+import io.serverlessworkflow.impl.executors.http.auth.jwt.JWKSValidator;
 import io.serverlessworkflow.impl.executors.http.auth.jwt.JWT;
 import io.serverlessworkflow.impl.executors.http.auth.requestbuilder.AuthRequestBuilder;
 import io.serverlessworkflow.impl.executors.http.auth.requestbuilder.OpenIdRequestBuilder;
 import jakarta.ws.rs.client.Invocation;
 import jakarta.ws.rs.client.Invocation.Builder;
 
+import java.util.ServiceLoader;
+
 public class OpenIdAuthProvider implements AuthProvider {
 
   private AuthRequestBuilder requestBuilder;
+
+  private final JWKSValidator jwksValidator;
 
   private static final String BEARER_TOKEN = "Bearer %s";
 
@@ -47,6 +52,11 @@ public class OpenIdAuthProvider implements AuthProvider {
     } else if (configuration.getOpenIdConnectAuthenticationPolicySecret() != null) {
       throw new UnsupportedOperationException("Secrets are still not supported");
     }
+
+    this.jwksValidator =
+            ServiceLoader.load(JWKSValidator.class)
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalStateException("No JWKSValidator implementation found"));
   }
 
   @Override

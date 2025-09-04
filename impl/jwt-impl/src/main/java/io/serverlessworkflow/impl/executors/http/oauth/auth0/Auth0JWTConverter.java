@@ -13,18 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.serverlessworkflow.impl.executors.http.oauth.jackson;
+package io.serverlessworkflow.impl.executors.http.oauth.auth0;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import io.serverlessworkflow.impl.executors.http.auth.jwt.JWT;
 import io.serverlessworkflow.impl.executors.http.auth.jwt.JWTConverter;
-import io.serverlessworkflow.impl.jackson.JsonUtils;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
-import java.util.Map;
 
-public class JacksonJWTConverter implements JWTConverter {
+public class Auth0JWTConverter implements JWTConverter {
 
   @Override
   public JWT fromToken(String token) throws IllegalArgumentException {
@@ -36,16 +30,7 @@ public class JacksonJWTConverter implements JWTConverter {
       throw new IllegalArgumentException(
           "Invalid JWT token format. There should at least two parts separated by :");
     }
-    return new JacksonJWTImpl(token, fromPart2Map(parts[0]), fromPart2Map(parts[1]));
+    return new Auth0JWTImpl(token);
   }
 
-  private static final Map<String, Object> fromPart2Map(String part) {
-    String decoded = new String(Base64.getUrlDecoder().decode(part), StandardCharsets.UTF_8);
-    try {
-      return JsonUtils.mapper().readValue(decoded, new TypeReference<Map<String, Object>>() {});
-    } catch (IOException e) {
-      throw new IllegalArgumentException(
-          "Invalid JTW token format. " + decoded + " is not a valid json", e);
-    }
-  }
 }

@@ -13,31 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.serverlessworkflow.impl.executors.http.auth.jwt;
+package io.serverlessworkflow.impl.executors.http.oauth.auth0;
 
-import java.time.Instant;
-import java.util.List;
-import java.util.Optional;
+import io.serverlessworkflow.impl.executors.http.auth.jwt.JWKSValidator;
+import io.serverlessworkflow.impl.executors.http.auth.jwt.JWT;
 
-public interface JWT {
+public class Auth0JWKSValidator implements JWKSValidator {
+    @Override
+    public void validate(JWT jwt, String jwksUrl) {
 
-  String token();
-
-  List<String> audience();
-
-  String algorithm();
-
-  <T> Optional<T> claim(String name, Class<T> type);
-
-  Optional<Instant> expiresAt();
-
-  Optional<Instant> issuedAt();
-
-  Optional<String> issuer();
-
-  String keyId();
-
-  Optional<String> subject();
-
-  Optional<String> type();
+    }
 }

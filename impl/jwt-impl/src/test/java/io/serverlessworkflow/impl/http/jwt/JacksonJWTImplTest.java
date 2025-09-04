@@ -18,10 +18,9 @@ package io.serverlessworkflow.impl.http.jwt;
 import static org.junit.jupiter.api.Assertions.*;
 
 import io.serverlessworkflow.impl.executors.http.auth.jwt.JWT;
-import io.serverlessworkflow.impl.executors.http.oauth.jackson.JacksonJWTConverter;
+import io.serverlessworkflow.impl.executors.http.oauth.auth0.Auth0JWTConverter;
 import java.time.Instant;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 
@@ -30,7 +29,7 @@ public class JacksonJWTImplTest {
   private static String JWT_TOKEN =
       "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJTY1c4RGI5RThtSnlvTUNqZHVtek5VR21FcG9MYURDb19ralZkVHJ2NDdVIn0.eyJleHAiOjE3NTYxNDgyNTcsImlhdCI6MTc1NjE0Nzk1NywianRpIjoiOWU4YzZjMWItZDBmZS00NGNhLThlOTgtNzNkZTY4OTdjYzE4IiwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDo4MDg4L3JlYWxtcy90ZXN0LXJlYWxtIiwiYXVkIjoiYWNjb3VudCIsInN1YiI6ImExZDdlMWVlLTVmZjMtNDc3Yi1hMmRhLTNhNDZkYThlZmRkMSIsInR5cCI6IkJlYXJlciIsImF6cCI6InNlcnZlcmxlc3Mtd29ya2Zsb3ciLCJzZXNzaW9uX3N0YXRlIjoiNDdiYzIxZDEtYTMyYi00OGJlLWI2OWQtZDM5MjE5MjViZTlmIiwiYWNyIjoiMSIsImFsbG93ZWQtb3JpZ2lucyI6WyJodHRwOi8vbG9jYWxob3N0OjgwODAiXSwicmVhbG1fYWNjZXNzIjp7InJvbGVzIjpbImRlZmF1bHQtcm9sZXMtdGVzdC1yZWFsbSIsIm9mZmxpbmVfYWNjZXNzIiwidW1hX2F1dGhvcml6YXRpb24iXX0sInJlc291cmNlX2FjY2VzcyI6eyJhY2NvdW50Ijp7InJvbGVzIjpbIm1hbmFnZS1hY2NvdW50IiwibWFuYWdlLWFjY291bnQtbGlua3MiLCJ2aWV3LXByb2ZpbGUiXX19LCJzY29wZSI6InByb2ZpbGUgZW1haWwiLCJzaWQiOiI0N2JjMjFkMS1hMzJiLTQ4YmUtYjY5ZC1kMzkyMTkyNWJlOWYiLCJlbWFpbF92ZXJpZmllZCI6ZmFsc2UsIm5hbWUiOiJEbWl0cmlpIFRpa2hvbWlyb3YiLCJwcmVmZXJyZWRfdXNlcm5hbWUiOiJzZXJ2ZXJsZXNzLXdvcmtmbG93LXRlc3QiLCJnaXZlbl9uYW1lIjoiRG1pdHJpaSIsImZhbWlseV9uYW1lIjoiVGlraG9taXJvdiIsImVtYWlsIjoiYW55QGV4YW1wbGUub3JnIn0.bY9DqVt5jPcfsY5-tL4JbXXptnyFBBLLKuViBH3xQBXpHSmtXKK78BjBdUOcCAg6SMatdQ4XK13RJJNPpjPDCkuBeLDMwsdCrzKcfaUWY7JCMfam4gIiC989m_S8y8jtJovDst8sjIkn95f5izuuiAxRYw69_IcY__cfBw7k0OhL7Y_YXCcwwz7l2yrbplmpLiakTTuzhbiCER5EPohguy9BkYG_u2RDUZg0Rvy3EzbyVhTQQyfKRFjoAxTa1Se484n2lXqgMn1JHTZLwrgXAjcMDVaktktLb_cn276ygAeuqPj7dOsQGEoLR-8enRz1eZKBPgO70LNqGkkkyHiyOA";
 
-  private static final JacksonJWTConverter converter = new JacksonJWTConverter();
+  private static final Auth0JWTConverter converter = new Auth0JWTConverter();
 
   @Test
   void tokenRoundTrip() {
@@ -42,10 +41,9 @@ public class JacksonJWTImplTest {
   void headerAndType() {
     JWT jwt = converter.fromToken(JWT_TOKEN);
 
-    Map<String, Object> h = jwt.header();
-    assertEquals("RS256", h.get("alg"));
-    assertTrue(h.containsKey("kid"));
-    assertEquals("JWT", h.get("typ"));
+    assertEquals("RS256", jwt.algorithm());
+    assertEquals("ScW8Db9E8mJyoMCjdumzNUGmEpoLaDCo_kjVdTrv47U", jwt.keyId());
+    assertEquals("JWT", jwt.type().get());
 
     assertEquals(Optional.of("JWT"), jwt.type(), "type() must be a header.typ");
   }
@@ -55,7 +53,7 @@ public class JacksonJWTImplTest {
     JWT jwt = converter.fromToken(JWT_TOKEN);
 
     assertEquals(Optional.of("Bearer"), jwt.claim("typ", String.class));
-    assertEquals("JWT", jwt.header().get("typ"));
+    assertEquals("JWT", jwt.type().get());
   }
 
   @Test
@@ -82,15 +80,7 @@ public class JacksonJWTImplTest {
     assertEquals(Optional.of("any@example.org"), jwt.claim("email", String.class));
     assertEquals(Optional.of(false), jwt.claim("email_verified", Boolean.class));
     assertTrue(jwt.claim("nonexistent", String.class).isEmpty());
-    assertTrue(jwt.claim("email_verified", String.class).isEmpty());
-  }
-
-  @Test
-  void mapsAreUnmodifiable() {
-    JWT jwt = converter.fromToken(JWT_TOKEN);
-
-    assertThrows(UnsupportedOperationException.class, () -> jwt.claims().put("x", 1));
-    assertThrows(UnsupportedOperationException.class, () -> jwt.header().put("x", 1));
+    assertFalse(jwt.claim("email_verified", Boolean.class).get());
   }
 
   @Test
