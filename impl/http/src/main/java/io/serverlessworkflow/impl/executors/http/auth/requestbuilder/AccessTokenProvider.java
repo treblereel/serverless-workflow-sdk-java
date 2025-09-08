@@ -18,7 +18,6 @@ package io.serverlessworkflow.impl.executors.http.auth.requestbuilder;
 import io.serverlessworkflow.impl.TaskContext;
 import io.serverlessworkflow.impl.executors.http.auth.jwt.JWT;
 import io.serverlessworkflow.impl.executors.http.auth.jwt.JWTConverter;
-import java.util.List;
 import java.util.Map;
 import java.util.ServiceLoader;
 
@@ -27,14 +26,12 @@ public class AccessTokenProvider {
   private final TokenResponseHandler tokenResponseHandler = new TokenResponseHandler();
 
   private final TaskContext context;
-  private final List<String> issuers;
   private final InvocationHolder invocation;
 
   private final JWTConverter jwtConverter;
 
-  AccessTokenProvider(InvocationHolder invocation, TaskContext context, List<String> issuers) {
+  AccessTokenProvider(InvocationHolder invocation, TaskContext context) {
     this.invocation = invocation;
-    this.issuers = issuers;
     this.context = context;
 
     this.jwtConverter =
@@ -43,18 +40,8 @@ public class AccessTokenProvider {
             .orElseThrow(() -> new IllegalStateException("No JWTConverter implementation found"));
   }
 
-  public JWT validateAndGet() {
+  public JWT get() {
     Map<String, Object> token = tokenResponseHandler.apply(invocation, context);
-    JWT jwt = jwtConverter.fromToken((String) token.get("access_token"));
-    if (!(issuers == null || issuers.isEmpty())) {
-      jwt.issuer()
-          .ifPresent(
-              issuer -> {
-                if (!issuers.contains(issuer)) {
-                  throw new IllegalStateException("Token issuer is not valid: " + issuer);
-                }
-              });
-    }
-    return jwt;
+    return jwtConverter.fromToken((String) token.get("access_token"));
   }
 }

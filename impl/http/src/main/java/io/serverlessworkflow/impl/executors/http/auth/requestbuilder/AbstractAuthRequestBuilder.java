@@ -90,8 +90,7 @@ abstract class AbstractAuthRequestBuilder implements AuthRequestBuilder {
       WorkflowContext workflow, TaskContext task, WorkflowModel model) {
     HttpRequestBuilder requestBuilder = new HttpRequestBuilder(application);
     steps.forEach(step -> step.accept(requestBuilder));
-    return new AccessTokenProvider(
-        requestBuilder.build(workflow, task, model), task, authenticationData.getIssuers());
+    return new AccessTokenProvider(requestBuilder.build(workflow, task, model), task);
   }
 
   protected void scope(HttpRequestBuilder requestBuilder) {

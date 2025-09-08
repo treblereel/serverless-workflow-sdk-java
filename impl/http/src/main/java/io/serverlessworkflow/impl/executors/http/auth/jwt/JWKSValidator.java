@@ -15,6 +15,8 @@
  */
 package io.serverlessworkflow.impl.executors.http.auth.jwt;
 
+import java.net.URI;
+
 public interface JWKSValidator {
-    void validate(JWT jwt, String jwksUrl);
+  void validate(JWT jwt, String[] expectedIssuer, String[] expectedAudience, URI jwksUrl);
 }

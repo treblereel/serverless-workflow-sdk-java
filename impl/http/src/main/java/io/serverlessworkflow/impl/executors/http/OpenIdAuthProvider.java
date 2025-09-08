@@ -54,9 +54,9 @@ public class OpenIdAuthProvider implements AuthProvider {
     }
 
     this.jwksValidator =
-            ServiceLoader.load(JWKSValidator.class)
-                    .findFirst()
-                    .orElseThrow(() -> new IllegalStateException("No JWKSValidator implementation found"));
+        ServiceLoader.load(JWKSValidator.class)
+            .findFirst()
+            .orElseThrow(() -> new IllegalStateException("No JWKSValidator implementation found"));
   }
 
   @Override
@@ -68,7 +68,7 @@ public class OpenIdAuthProvider implements AuthProvider {
   @Override
   public void preRequest(
       Invocation.Builder builder, WorkflowContext workflow, TaskContext task, WorkflowModel model) {
-    JWT jwt = requestBuilder.build(workflow, task, model).validateAndGet();
+    JWT jwt = requestBuilder.build(workflow, task, model).get();
     builder.header(AuthProviderFactory.AUTH_HEADER_NAME, String.format(BEARER_TOKEN, jwt.token()));
   }
 }
