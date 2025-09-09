@@ -32,5 +32,4 @@ public class Auth0JWTConverter implements JWTConverter {
     }
     return new Auth0JWTImpl(token);
   }
-
 }

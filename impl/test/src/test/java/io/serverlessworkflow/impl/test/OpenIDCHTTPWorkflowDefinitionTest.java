@@ -16,7 +16,6 @@
 package io.serverlessworkflow.impl.test;
 
 import static io.serverlessworkflow.api.WorkflowReader.readWorkflowFromClasspath;
-import static io.serverlessworkflow.impl.test.OAuthHTTPWorkflowDefinitionTest.fakeAccessToken;
 import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -36,6 +35,8 @@ import org.junit.jupiter.api.Test;
 public class OpenIDCHTTPWorkflowDefinitionTest {
 
   private static final ObjectMapper MAPPER = new ObjectMapper();
+
+  private JWTTokenMockHandler tokenHandler = new JWTTokenMockHandler();
 
   private static final String RESPONSE =
       """
@@ -81,9 +82,9 @@ public class OpenIDCHTTPWorkflowDefinitionTest {
 
   @Test
   public void testOpenIDCClientSecretPostPasswordWorkflowExecution() throws Exception {
-
-    String jwt = fakeAccessToken();
-    String tokenResponse = TOKEN_RESPONSE_TEMPLATE.formatted(jwt);
+    String tokenResponse =
+        tokenHandler.generateOpenIDCTokenResponseJson(
+            "serverless-workflow-test", "http://localhost:8888/realms/test-realm", 60);
 
     authServer.enqueue(
         new MockResponse()
@@ -99,7 +100,6 @@ public class OpenIDCHTTPWorkflowDefinitionTest {
 
     Workflow workflow = readWorkflowFromClasspath("openidcClientSecretPostPasswordHttpCall.yaml");
     Map<String, Object> result;
-    System.err.println("START");
     try (WorkflowApplication app = WorkflowApplication.builder().build()) {
       result =
           app.workflowDefinition(workflow).instance(Map.of()).start().get().asMap().orElseThrow();
@@ -124,14 +124,15 @@ public class OpenIDCHTTPWorkflowDefinitionTest {
     RecordedRequest petRequest = apiServer.takeRequest();
     assertEquals("GET", petRequest.getMethod());
     assertEquals("/hello", petRequest.getPath());
-    assertEquals("Bearer " + jwt, petRequest.getHeader("Authorization"));
+    String access_token = MAPPER.readTree(tokenResponse).get("access_token").asText();
+    assertEquals("Bearer " + access_token, petRequest.getHeader("Authorization"));
   }
 
   @Test
   public void testOpenIDCClientSecretPostWithArgsWorkflowExecution() throws Exception {
-    String jwt = fakeAccessToken();
-    String tokenResponse = TOKEN_RESPONSE_TEMPLATE.formatted(jwt);
-
+    String tokenResponse =
+        tokenHandler.generateOpenIDCTokenResponseJson(
+            "serverless-workflow-test", "http://localhost:8888/realms/test-realm", 60);
     authServer.enqueue(
         new MockResponse()
             .setBody(tokenResponse)
@@ -177,13 +178,15 @@ public class OpenIDCHTTPWorkflowDefinitionTest {
     RecordedRequest petRequest = apiServer.takeRequest();
     assertEquals("GET", petRequest.getMethod());
     assertEquals("/hello", petRequest.getPath());
-    assertEquals("Bearer " + jwt, petRequest.getHeader("Authorization"));
+    String access_token = MAPPER.readTree(tokenResponse).get("access_token").asText();
+    assertEquals("Bearer " + access_token, petRequest.getHeader("Authorization"));
   }
 
   @Test
   public void testOpenIDCClientSecretPostWithArgsAllGrantsWorkflowExecution() throws Exception {
-    String jwt = fakeAccessToken();
-    String tokenResponse = TOKEN_RESPONSE_TEMPLATE.formatted(jwt);
+    String tokenResponse =
+        tokenHandler.generateOpenIDCTokenResponseJson(
+            "serverless-workflow-test", "http://localhost:8888/realms/test-realm", 60);
 
     authServer.enqueue(
         new MockResponse()
@@ -234,17 +237,16 @@ public class OpenIDCHTTPWorkflowDefinitionTest {
     RecordedRequest petRequest = apiServer.takeRequest();
     assertEquals("GET", petRequest.getMethod());
     assertEquals("/hello", petRequest.getPath());
-    assertEquals("Bearer " + jwt, petRequest.getHeader("Authorization"));
-
-    System.out.println("tokenRequestBody = \n" + tokenRequestBody);
+    String access_token = MAPPER.readTree(tokenResponse).get("access_token").asText();
+    assertEquals("Bearer " + access_token, petRequest.getHeader("Authorization"));
   }
 
   @Test
   public void testOpenIDCClientSecretPostClientCredentialsParamsWorkflowExecution()
       throws Exception {
-    String jwt = fakeAccessToken();
-
-    String tokenResponse = TOKEN_RESPONSE_TEMPLATE.formatted(jwt);
+    String tokenResponse =
+        tokenHandler.generateOpenIDCTokenResponseJson(
+            "serverless-workflow-test", "http://localhost:8888/realms/test-realm", 60);
 
     authServer.enqueue(
         new MockResponse()
@@ -287,15 +289,16 @@ public class OpenIDCHTTPWorkflowDefinitionTest {
     RecordedRequest petRequest = apiServer.takeRequest();
     assertEquals("GET", petRequest.getMethod());
     assertEquals("/hello", petRequest.getPath());
-    assertEquals("Bearer " + jwt, petRequest.getHeader("Authorization"));
+    String access_token = MAPPER.readTree(tokenResponse).get("access_token").asText();
+    assertEquals("Bearer " + access_token, petRequest.getHeader("Authorization"));
   }
 
   @Test
   public void testOpenIDCClientSecretPostClientCredentialsParamsNoEndpointWorkflowExecution()
       throws Exception {
-    String jwt = fakeAccessToken();
-
-    String tokenResponse = TOKEN_RESPONSE_TEMPLATE.formatted(jwt);
+    String tokenResponse =
+        tokenHandler.generateOpenIDCTokenResponseJson(
+            "serverless-workflow-test", "http://localhost:8888/realms/test-realm", 60);
 
     authServer.enqueue(
         new MockResponse()
@@ -338,13 +341,15 @@ public class OpenIDCHTTPWorkflowDefinitionTest {
     RecordedRequest petRequest = apiServer.takeRequest();
     assertEquals("GET", petRequest.getMethod());
     assertEquals("/hello", petRequest.getPath());
-    assertEquals("Bearer " + jwt, petRequest.getHeader("Authorization"));
+    String access_token = MAPPER.readTree(tokenResponse).get("access_token").asText();
+    assertEquals("Bearer " + access_token, petRequest.getHeader("Authorization"));
   }
 
   @Test
   public void testOpenIDCJSONPasswordWorkflowExecution() throws Exception {
-    String jwt = fakeAccessToken();
-    String tokenResponse = TOKEN_RESPONSE_TEMPLATE.formatted(jwt);
+    String tokenResponse =
+        tokenHandler.generateOpenIDCTokenResponseJson(
+            "serverless-workflow-test", "http://localhost:8888/realms/test-realm", 60);
 
     authServer.enqueue(
         new MockResponse()
@@ -395,13 +400,15 @@ public class OpenIDCHTTPWorkflowDefinitionTest {
     RecordedRequest petRequest = apiServer.takeRequest();
     assertEquals("GET", petRequest.getMethod());
     assertEquals("/hello", petRequest.getPath());
-    assertEquals("Bearer " + jwt, petRequest.getHeader("Authorization"));
+    String access_token = MAPPER.readTree(tokenResponse).get("access_token").asText();
+    assertEquals("Bearer " + access_token, petRequest.getHeader("Authorization"));
   }
 
   @Test
   public void testOpenIDCJSONWithArgsWorkflowExecution() throws Exception {
-    String jwt = fakeAccessToken();
-    String tokenResponse = TOKEN_RESPONSE_TEMPLATE.formatted(jwt);
+    String tokenResponse =
+        tokenHandler.generateOpenIDCTokenResponseJson(
+            "serverless-workflow-test", "http://localhost:8888/realms/test-realm", 60);
 
     authServer.enqueue(
         new MockResponse()
@@ -456,13 +463,15 @@ public class OpenIDCHTTPWorkflowDefinitionTest {
     RecordedRequest petRequest = apiServer.takeRequest();
     assertEquals("GET", petRequest.getMethod());
     assertEquals("/hello", petRequest.getPath());
-    assertEquals("Bearer " + jwt, petRequest.getHeader("Authorization"));
+    String access_token = MAPPER.readTree(tokenResponse).get("access_token").asText();
+    assertEquals("Bearer " + access_token, petRequest.getHeader("Authorization"));
   }
 
   @Test
   public void testOpenIDCJSONWithArgsNoEndPointWorkflowExecution() throws Exception {
-    String jwt = fakeAccessToken();
-    String tokenResponse = TOKEN_RESPONSE_TEMPLATE.formatted(jwt);
+    String tokenResponse =
+        tokenHandler.generateOpenIDCTokenResponseJson(
+            "serverless-workflow-test", "http://localhost:8888/realms/test-realm", 60);
 
     authServer.enqueue(
         new MockResponse()
@@ -516,13 +525,15 @@ public class OpenIDCHTTPWorkflowDefinitionTest {
     RecordedRequest petRequest = apiServer.takeRequest();
     assertEquals("GET", petRequest.getMethod());
     assertEquals("/hello", petRequest.getPath());
-    assertEquals("Bearer " + jwt, petRequest.getHeader("Authorization"));
+    String access_token = MAPPER.readTree(tokenResponse).get("access_token").asText();
+    assertEquals("Bearer " + access_token, petRequest.getHeader("Authorization"));
   }
 
   @Test
   public void testOpenIDCJSONWithArgsAllGrantsWorkflowExecution() throws Exception {
-    String jwt = fakeAccessToken();
-    String tokenResponse = TOKEN_RESPONSE_TEMPLATE.formatted(jwt);
+    String tokenResponse =
+        tokenHandler.generateOpenIDCTokenResponseJson(
+            "serverless-workflow-test", "http://localhost:8888/realms/test-realm", 60);
 
     authServer.enqueue(
         new MockResponse()
@@ -589,14 +600,15 @@ public class OpenIDCHTTPWorkflowDefinitionTest {
     RecordedRequest petRequest = apiServer.takeRequest();
     assertEquals("GET", petRequest.getMethod());
     assertEquals("/hello", petRequest.getPath());
-    assertEquals("Bearer " + jwt, petRequest.getHeader("Authorization"));
+    String access_token = MAPPER.readTree(tokenResponse).get("access_token").asText();
+    assertEquals("Bearer " + access_token, petRequest.getHeader("Authorization"));
   }
 
   @Test
   public void testOpenIDCJSONClientCredentialsWorkflowExecution() throws Exception {
-    String jwt = fakeAccessToken();
-
-    String tokenResponse = TOKEN_RESPONSE_TEMPLATE.formatted(jwt);
+    String tokenResponse =
+        tokenHandler.generateOpenIDCTokenResponseJson(
+            "serverless-workflow-test", "http://localhost:8888/realms/test-realm", 60);
 
     authServer.enqueue(
         new MockResponse()
@@ -638,14 +650,15 @@ public class OpenIDCHTTPWorkflowDefinitionTest {
     RecordedRequest petRequest = apiServer.takeRequest();
     assertEquals("GET", petRequest.getMethod());
     assertEquals("/hello", petRequest.getPath());
-    assertEquals("Bearer " + jwt, petRequest.getHeader("Authorization"));
+    String access_token = MAPPER.readTree(tokenResponse).get("access_token").asText();
+    assertEquals("Bearer " + access_token, petRequest.getHeader("Authorization"));
   }
 
   @Test
   public void testOpenIDCJSONClientCredentialsParamsWorkflowExecution() throws Exception {
-    String jwt = fakeAccessToken();
-
-    String tokenResponse = TOKEN_RESPONSE_TEMPLATE.formatted(jwt);
+    String tokenResponse =
+        tokenHandler.generateOpenIDCTokenResponseJson(
+            "serverless-workflow-test", "http://localhost:8888/realms/test-realm", 60);
 
     authServer.enqueue(
         new MockResponse()
@@ -693,14 +706,15 @@ public class OpenIDCHTTPWorkflowDefinitionTest {
     RecordedRequest petRequest = apiServer.takeRequest();
     assertEquals("GET", petRequest.getMethod());
     assertEquals("/hello", petRequest.getPath());
-    assertEquals("Bearer " + jwt, petRequest.getHeader("Authorization"));
+    String access_token = MAPPER.readTree(tokenResponse).get("access_token").asText();
+    assertEquals("Bearer " + access_token, petRequest.getHeader("Authorization"));
   }
 
   @Test
   public void testOpenIDCJSONClientCredentialsParamsNoEndpointWorkflowExecution() throws Exception {
-    String jwt = fakeAccessToken();
-
-    String tokenResponse = TOKEN_RESPONSE_TEMPLATE.formatted(jwt);
+    String tokenResponse =
+        tokenHandler.generateOpenIDCTokenResponseJson(
+            "serverless-workflow-test", "http://localhost:8888/realms/test-realm", 60);
 
     authServer.enqueue(
         new MockResponse()
@@ -748,6 +762,7 @@ public class OpenIDCHTTPWorkflowDefinitionTest {
     RecordedRequest petRequest = apiServer.takeRequest();
     assertEquals("GET", petRequest.getMethod());
     assertEquals("/hello", petRequest.getPath());
-    assertEquals("Bearer " + jwt, petRequest.getHeader("Authorization"));
+    String access_token = MAPPER.readTree(tokenResponse).get("access_token").asText();
+    assertEquals("Bearer " + access_token, petRequest.getHeader("Authorization"));
   }
 }

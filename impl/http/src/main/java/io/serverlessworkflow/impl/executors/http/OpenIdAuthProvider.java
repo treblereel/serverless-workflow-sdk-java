@@ -28,7 +28,6 @@ import io.serverlessworkflow.impl.executors.http.auth.requestbuilder.AuthRequest
 import io.serverlessworkflow.impl.executors.http.auth.requestbuilder.OpenIdRequestBuilder;
 import jakarta.ws.rs.client.Invocation;
 import jakarta.ws.rs.client.Invocation.Builder;
-
 import java.util.ServiceLoader;
 
 public class OpenIdAuthProvider implements AuthProvider {

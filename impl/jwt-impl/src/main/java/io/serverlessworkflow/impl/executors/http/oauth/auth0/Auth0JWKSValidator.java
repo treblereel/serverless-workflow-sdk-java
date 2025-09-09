@@ -50,8 +50,8 @@ public class Auth0JWKSValidator implements JWKSValidator {
         providers.put(
             jwksUrl,
             new JwkProviderBuilder(jwksUrl.toURL())
-                .cached(10, 24, TimeUnit.HOURS)
-                .rateLimited(10, 1, TimeUnit.MINUTES)
+                .cached(1024, 24, TimeUnit.HOURS)
+                .rateLimited(600, 1, TimeUnit.MINUTES)
                 .timeouts(CONNECT_TIMEOUT_MS, READ_TIMEOUT_MS)
                 .build());
       } catch (MalformedURLException e) {
@@ -114,5 +114,9 @@ public class Auth0JWKSValidator implements JWKSValidator {
             + ": "
             + publicKey.getClass().getSimpleName()
             + ". Supported: RSAPublicKey, ECPublicKey");
+  }
+
+  public void clearCache() {
+    providers.clear();
   }
 }

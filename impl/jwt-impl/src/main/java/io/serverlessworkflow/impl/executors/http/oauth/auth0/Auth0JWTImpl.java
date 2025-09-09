@@ -31,7 +31,8 @@ public class Auth0JWTImpl implements JWT {
   Auth0JWTImpl(String token) {
     this.token = Objects.requireNonNull(token, "token");
     try {
-      jwt = com.auth0.jwt.JWT.decode(token);
+      com.auth0.jwt.JWT jwt1 = new com.auth0.jwt.JWT();
+      jwt = jwt1.decodeJwt(token);
     } catch (Exception e) {
       throw new IllegalArgumentException("Invalid JWT token", e);
     }

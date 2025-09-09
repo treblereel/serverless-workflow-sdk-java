@@ -71,6 +71,8 @@ public class OAuth2AuthProvider implements AuthProvider {
       Invocation.Builder builder, WorkflowContext workflow, TaskContext task, WorkflowModel model) {
     JWT jwt = requestBuilder.build(workflow, task, model).get();
 
+    System.out.println("token " + jwt.token());
+
     String[] issuers = getIssuers();
     String[] audience = getAudience();
 
