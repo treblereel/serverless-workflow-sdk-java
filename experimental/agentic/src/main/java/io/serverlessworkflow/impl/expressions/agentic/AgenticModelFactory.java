@@ -55,6 +55,10 @@ class AgenticModelFactory implements WorkflowModelFactory {
     // hood, the agent already updated it.
     if (prev instanceof AgenticModel agenticModel) {
       this.scopeRegistryAssessor.setAgenticScope(agenticModel.getAgenticScope());
+
+      agenticModel.getAgenticScope().state().put(DEFAULT_AGENTIC_SCOPE_STATE_KEY, obj);
+
+      System.out.println("FromAny - Agentic Object: " + obj);
     }
     return newAgenticModel(obj);
   }
